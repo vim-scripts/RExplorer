@@ -1,0 +1,97 @@
+"First things first ;)
+"*********************************
+"*** Author : Arun Easi        ***
+"*** E-mail : arunke@yahoo.com ***
+"*** Date   : Dec 13th, 2001   ***
+"*********************************
+"===============================================================================
+" Version   Description                                             Date
+"-------------------------------------------------------------------------------
+"   1.00    First submit :)                                         Jan 26, '02
+"===============================================================================
+" This file acts as a configuration file and initialization file
+" ----------------------------------------------------------------------------
+" *** USAGE ******************************************************************
+" 1. Left mouse click on +/- ==> Expand/Collapse
+" 2. Double click            ==> Open if external viewers are defined
+"                                or open locally (read on to learn howto)
+"                                or Expand/Collapse
+" 3. Right mouse             ==> Open file locally/Expand/Collapse
+" 4. \sf                     ==> Show-Files matching the extension
+" 5. \hf                     ==> Hide-Files matching the extension
+" 6. \ff                     ==> currently Filtered-Files
+" 7. \.                      ==> To see hidden (dot files, only UNIX) files
+" 8. <F5>                    ==> Refresh
+" 9. Ctrl-R                  ==> Re-read file-association file (this file)
+"10. Explore <path>          ==> Start a new tree with <path> as root and
+"                                explore
+" ****************************************************************************
+" NOTE: All the mappings with \ as the start is to be read as <MapLeader>, if
+"       defined
+" NOTE: *** One global mapping I did is Ctrl-LeftMouse closing the window ***
+"       If you do not like the behaviour, you can unmap(see end of this file)
+" NOTE: The left scrollbar in gui versions gives an unpleasant flicker when
+"       files are opened at the first time. To avoid, do ":se go-=L"
+" ****************************************************************************
+" *** Any OS who uses \ as the path separator (MS-Windows) set "b:os"      ***
+" *** variable to win32. (let b:os="win32")                                ***
+" ***                                                                      ***
+" *** MORE NOTES TO MS-WINDOWS guys. If you want to explore other drives   ***
+" ***  use :Explore <drive>//                                              ***
+" ***  eg: :Explore d://                                                   ***
+" ****************************************************************************
+let b:os="unix"
+if has("win32")||has("win95")||has("win16")
+    let b:os="win32"
+endif
+
+" Setting up File associations
+"   Hope example explains.
+"
+"   If you want to add association for ".pdf" files, name a variable
+"   b:pdf and assign it to a value which is the executable needed to open
+"   the file (which you are trying to open in RExplorer). Do it like
+"
+"       let b:pdf="/path/to/pdf_opener %1"
+"
+"   As you might've already guessed, %1 will be substituted by the absolute
+"   path to the file
+"
+" NOTE1: file extension search is case insensitive
+" NOTE2: check v:statusmsg for the last spawned command line
+
+"change the executable path
+if b:os == "unix"
+    let b:pdf="xpdf %1&"
+    let b:txt="gvim %1&"
+    let b:img="xview %1&"
+else
+    "M$-Windows
+    let b:txt="cmd/c start notepad %1"
+    let b:img="cmd/c start mspaint %1"
+endif
+
+" Another way of setting associations (Bulk setting) {1st one overrides 2nd}
+" Keep adding stuff to the predefined variable "b:rextype" in the format
+" mentioned below. Syntax: <type: ext1,ext2,ext3..>
+" This is like aliasing a set of extensions to the name in LHS
+let b:rextype="
+\<img: bmp,jpg,jpe,jpeg,gif,tiff>
+\<txt: c,h,txt>
+\"
+" ----------------------------------------------------------------------------
+" Initialization stuffs go here
+" *** START HERE ***
+" Give the directories you wish to explore during startup (each on different
+" lines). MS-Windows guys, use like :Explore <drive>// (eg: :Explore c://)
+" Explore but 'D'o not 'E'xpand
+if b:os == "unix"
+    Explore / de
+    Explore /home
+else
+    Explore C://
+    Explore D:// de
+endif
+" ----------------------------------------------------------------------------
+" Ctrl-LeftMouse defaults to closing the buffer, uncomment next to disable that
+" unmap <C-LeftMouse>

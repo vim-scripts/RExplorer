@@ -1,0 +1,19 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=192
+
+This is an attempt to implement a tree explorer purely using vim 6.0 language. I have tried it on a unix and windows system and runs without any problem. Not sure about the behaviour in a different OS.
+
+In the current version, the explorer window opens always on the left hand side.
+-Arun
+
+Ascii snapshot:
+----------------------
+[+] /
+[-] /home/user
+ | [+] install
+ | [+] mail
+ | [+] misc
+ | [+] src
+ | [+] tmp
+ |  |- README.txt
+ |  |- hello.c  
+ |
