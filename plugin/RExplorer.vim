@@ -1,13 +1,16 @@
-"First things first ;)
 "*********************************
 "*** Author : Arun Easi        ***
 "*** E-mail : arunke@yahoo.com ***
-"*** Date   : Dec 13th, 2001   ***
 "*********************************
+"
+"Version 1.05
+"
+" Change Log:
 "===============================================================================
 " Version   Description                                             Date
 "-------------------------------------------------------------------------------
 "   1.00    First submit :)                                         Jan 26, '02
+"   1.05    Fixed bug with vim7                                     Nov 16, '06
 "===============================================================================
 
 " In case of problems, try running like this:
@@ -20,7 +23,8 @@ let s:wish_files=",,"
 let s:ignore_files=",,"
 
 fu! s:Init()
-    let my_name='[RExplorer]'
+    "3/7/05: escaping [
+    let my_name='\[RExplorer]'
     if bufname("%") != my_name
         let cb=bufnr("%")
         silent! wincmd w
@@ -56,9 +60,10 @@ endf
 " need to use this wrapper to call any function
 fu! s:BugWrapper(function)
     if bufnr("%") != s:re_vim
-        return
+        return 0
     endif
-    exe "call s:".a:function
+    exe "let x=s:".a:function
+    return x
 endf
 
 fu! s:ReSrcAssocFile()
@@ -124,20 +129,21 @@ fu! s:Refresh()
     call s:ExpandOrCollapse()
     call s:ExpandOrCollapse()
     norm! mg
-    let srch_esc='/\['
+    let srch_esc='/\[.'
     let g:abc='^'.escape(cur_hi_line, srch_esc).'$'
-    if search('^'.escape(cur_hi_line, srch_esc).'$', "w") != 0
-        if search('^'.escape(cline, srch_esc).'$', "W") != 0
-            exe "norm! ".cur_scr_col."|zs".cur_col."|"
-        else
-            norm! `g
-        endif
+    call search('^'.escape(cur_hi_line, srch_esc).'$', "w")
+    if search('^'.escape(cline, srch_esc).'$', "W") != 0
+        exe "norm! ".cur_scr_col."|zs".cur_col."|"
+    else
+        norm! `g
     endif
 endf
 
 fu! s:MapInit()
+    nn <silent> <buffer> ]<CR> :call <SID>BugWrapper("OpenIfFile('loc')")<cr>
+    nn <silent> <buffer> <CR> :call <SID>BugWrapper("OpenIfFile('rip')")<cr>
     nn <silent> <buffer> <LeftMouse> <LeftMouse>:call <SID>BugWrapper("ExpandOrCollapse()")<cr>
-    nn <silent> <buffer> <cr> :call <SID>BugWrapper("ExpandOrCollapse()")<cr>
+    "nn <silent> <buffer> <cr> :call <SID>BugWrapper("ExpandOrCollapse()")<cr>
     nn <silent> <buffer> <2-LeftMouse> :call <SID>BugWrapper("OpenIfFile('rip')")<cr>
     nn <silent> <buffer> <RightMouse> <LeftMouse>:call <SID>BugWrapper("OpenIfFile('loc')")<cr>
     nn <silent> <buffer> <F5> :call <SID>BugWrapper("Refresh()")<cr>
@@ -251,18 +257,22 @@ endf
 fu! s:ExpandOrCollapse()
     setlocal modifiable
     norm! mgg0myHmh`gy2l
+    let ret=0
     let init_mid=line("'h")
     if (@" == "+]")
         norm! r-W
         let path=s:GetPath()
         call s:Expand(path)
+        let ret=1
     elseif (@" == "-]")
         silent! exe "norm! r+jly0dV/^\<c-r>\"\ $/e\<cr>"
         call histdel("search", -1)
+        let ret=1
     endif
     exe init_mid
     silent! norm! zt`g`yzs`g
     setlocal nomodified nomodifiable
+    return ret
 endf
 
 " This was a part of ExpandOrCollapse previously. If single clicked on a
@@ -273,18 +283,22 @@ endf
 fu! s:OpenIfFile(where)
     norm! mgg0myHmh`gy2l
     let init_mid=line("'h")
+    let ret=0
     if (match(getline(line(".")), "|-", 0) > 0)
         exe "norm! 0f-W"
         let path=s:GetPath()
         call s:OpenFile(path, a:where)
+        let ret=1
     else
         norm! 0
         if search('\%'.line('.').'l[+-]]', "W")
             call s:ExpandOrCollapse()
         endif
+        let ret=2
     endif
     exe init_mid
     silent! norm! zt`g`yzs`g
+    return ret
 endf
 
 fu! s:Expand(dir)
@@ -295,6 +309,8 @@ fu! s:Expand(dir)
         return
     endif
     silent! put =s:cur_list.@"
+    "norm! For vim 7. vim 7 leaves cursor after pasted chars.
+    norm! `[
     let s:cur_list_len=s:cur_list_len-1
     if s:cur_list_len == 0
         let s:cur_list_len="k"
@@ -312,6 +328,14 @@ endf
 " can interpret a call to "My Computer" and return "a:, c:, d:" (how you
 " get that is different) etc. Likewise, one can probably keep an
 " ftp hook also here.
+"
+" The o/p of this function prefixes [+] for dirs and |- for files. Necessary
+" preceding "| | |" needed to show the levels of dir has to be done by the
+" caller". Sample s:cur_list:
+" [+] A0
+" [+] nvdata
+"  |- fw116.zip
+" 
 " 
 fu! s:VimGetListing(dir)
     let cur_dlist=""

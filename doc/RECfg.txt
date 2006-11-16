@@ -33,7 +33,7 @@
 " NOTE: The left scrollbar in gui versions gives an unpleasant flicker when
 "       files are opened at the first time. To avoid, do ":se go-=L"
 " ****************************************************************************
-" *** Any OS who uses \ as the path separator (MS-Windows) set "b:os"      ***
+" *** Any OS that uses \ as the path separator (MS-Windows) set "b:os"     ***
 " *** variable to win32. (let b:os="win32")                                ***
 " ***                                                                      ***
 " *** MORE NOTES TO MS-WINDOWS guys. If you want to explore other drives   ***
@@ -65,6 +65,7 @@ if b:os == "unix"
     let b:pdf="xpdf %1&"
     let b:txt="gvim %1&"
     let b:img="xview %1&"
+    let b:htm="explorert %1"
 else
     "M$-Windows
     let b:txt="cmd/c start notepad %1"
@@ -78,6 +79,7 @@ endif
 let b:rextype="
 \<img: bmp,jpg,jpe,jpeg,gif,tiff>
 \<txt: c,h,txt>
+\<htm: htm,html>
 \"
 " ----------------------------------------------------------------------------
 " Initialization stuffs go here
@@ -87,7 +89,7 @@ let b:rextype="
 " Explore but 'D'o not 'E'xpand
 if b:os == "unix"
     Explore / de
-    Explore /home
+    Explore /home/aeasi
 else
     Explore C://
     Explore D:// de
